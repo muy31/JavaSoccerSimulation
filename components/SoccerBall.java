@@ -54,7 +54,7 @@ public class SoccerBall implements Animatable {
     }
 
     public void applyForce(Vector3 force) {
-        this.angularAcceleration += force / this.mass;
+        this.acceleration = this.acceleration.add(force.divide(this.mass));
     }
 
     public void applyTorque(float torque) {
@@ -79,12 +79,12 @@ public class SoccerBall implements Animatable {
 
     @Override
     public float getX() {
-        return xPos;
+        return this.position.x;
     }
 
     @Override
     public float getY() {
-        return yPos;
+        return this.position.y;
     }
 
     @Override
