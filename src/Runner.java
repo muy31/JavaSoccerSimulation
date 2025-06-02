@@ -2,6 +2,7 @@ import components.SoccerField;
 import components.SoccerBall;
 import assets.SoccerFieldAnimationPanel;
 import javax.swing.*;
+import assets.Vector3;
 
 public class Runner {
     public static void main(String[] args) {
