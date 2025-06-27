@@ -1,6 +1,7 @@
 package assets;
 
 import components.Animatable;
+import components.Constants;
 import components.SoccerField;
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +15,7 @@ public class SoccerFieldAnimationPanel extends SoccerFieldPanel {
     private int x0 = 0, y0 = 0;
 
     public SoccerFieldAnimationPanel() {
-        timer = new Timer(16, e -> {
+        timer = new Timer(Constants.TimeUpdate, e -> {
             for (Animatable obj : objects) {
                 obj.update();
             }

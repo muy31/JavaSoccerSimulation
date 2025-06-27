@@ -1,4 +1,5 @@
 import components.SoccerField;
+import components.Constants;
 import components.SoccerBall;
 import assets.SoccerFieldAnimationPanel;
 import javax.swing.*;
@@ -9,7 +10,8 @@ public class Runner {
         SoccerField field = new SoccerField();
         SoccerBall ball = new SoccerBall();
         ball.setPosition(0, 0);
-        ball.applyForce(new Vector3(0.1f, 0, 0));
+        ball.applyImpulse(new Vector3(1000f, 1000f, 0), (float) Constants.TimeUpdate /1000f);
+
         SoccerFieldAnimationPanel panel = new SoccerFieldAnimationPanel();
         panel.setSoccerField(field);
         panel.addObject(ball);

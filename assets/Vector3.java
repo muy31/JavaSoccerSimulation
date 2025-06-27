@@ -17,6 +17,7 @@ public class Vector3 {
         this.z = 0;
     }
     
+    // Trying to consider whether it's better to update or create new object for these operations
     public Vector3 add(Vector3 v) {
         return new Vector3(this.x + v.x, this.y + v.y, this.z + v.z);
     }
@@ -39,7 +40,11 @@ public class Vector3 {
 
     public Vector3 normalize() {
         float magnitude = magnitude();
-        return new Vector3(this.x / magnitude, this.y / magnitude, this.z / magnitude);
+        if (magnitude > 0) {
+            return new Vector3(this.x / magnitude, this.y / magnitude, this.z / magnitude);
+        } else {
+            return new Vector3();
+        }
     }
 
     public float dotProduct(Vector3 v) {
