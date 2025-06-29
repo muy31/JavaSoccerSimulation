@@ -1,24 +1,49 @@
 package components;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.util.Queue;
+import java.util.ArrayDeque;
+
 import assets.Vector3;
 
-public class SoccerBall implements Animatable {
-    private float mass = 0.43f;
-    private float radius = 0.11f;
+public class PhysicsObject {
+
+    public static float timeStepPerUpdate = 0.05f; // time step per physics resolution
+    public static int updatesPerFrame = 2;
+
+    // Object attributes
+    private float mass;
     private boolean inContactWithGround = true;
 
-    // Soccer ball position
-    private Vector3 position = new Vector3(0f, 0f, radius + 0.01f);
+    // Position
+    private Vector3 position = new Vector3(0f, 0f, 0f);
     private Vector3 velocity = new Vector3();
     private Vector3 acceleration = new Vector3(); // Changes according to forces applied
 
-    // Soccer ball spin
+    // Spin
     private Vector3 angularVelocity = new Vector3();
     private Vector3 angularAcceleration = new Vector3();
 
-    public SoccerBall() {}
+    private Queue<Vector3> forcesThisUpdate;
+
+    // Constructor
+    public PhysicsObject() {
+        forcesThisUpdate = new ArrayDeque<Vector3>();
+        position = new Vector3(0f, 0f, 0f);
+        velocity = new Vector3();
+        acceleration = new Vector3();
+        angularVelocity = new Vector3();
+        angularAcceleration = new Vector3();
+    }
+
+    public PhysicsObject(float x, float y, float z) {
+        forcesThisUpdate = new ArrayDeque<Vector3>();
+        position = new Vector3(0f, 0f, 0f);
+        velocity = new Vector3();
+        acceleration = new Vector3();
+        angularVelocity = new Vector3();
+        angularAcceleration = new Vector3();
+        this.setPosition(x, y);
+    }
 
     // Set functions
     public void setPosition(float x, float y) {
@@ -40,32 +65,25 @@ public class SoccerBall implements Animatable {
 
     // Natural update functions
     public void updatePosition() {
-        Vector3 displacementInTime = this.velocity.multiply((float) Constants.TimeUpdate / 1000f);
+        Vector3 displacementInTime = this.velocity.multiply(timeStepPerUpdate);
         this.position = this.position.add(displacementInTime);
     }
 
     public void updateVelocity() {
-        this.addVelocity(this.acceleration);
+        Vector3 velocityChangeInTime = this.acceleration.multiply(timeStepPerUpdate);
+        this.velocity = this.velocity.add(velocityChangeInTime);
     }
 
     public void updateAngularVelocity() {
-        Vector3 angularVelDeltaInTime = this.angularAcceleration.multiply((float) Constants.TimeUpdate / 1000f);
+        Vector3 angularVelDeltaInTime = this.angularAcceleration.multiply(timeStepPerUpdate);
         this.angularVelocity = this.angularVelocity.add(angularVelDeltaInTime);
     }
 
-    // Direct push functions (the idea is adding absolute realtime units)
-    private void addVelocity(Vector3 v) {
-        this.velocity = this.velocity.add(v.multiply((float) Constants.TimeUpdate / 1000f));
-    }
-
-    public void addAngularVelocity(float w) {
-        this.angularVelocity = this.angularVelocity.add(new Vector3(0f, 0f, w).multiply((float) Constants.TimeUpdate / 1000f));
-    }
+    // Direct applications
 
     // Instead of applying forces, should add to a queue that is iterated per update
     public void applyForce(Vector3 force) {
-        Vector3 forceInTime = force.divide(this.mass).multiply((float) Constants.TimeUpdate / 1000f);
-        this.acceleration = this.acceleration.add(forceInTime);
+        forcesThisUpdate.add(force);
     }
 
     // Real seconds of time, prevents continuous application of force (mimicking impact rather than force)
@@ -85,7 +103,7 @@ public class SoccerBall implements Animatable {
         // Drag force is 
         // 0.5 * density * C_D * A (cross-sectional) * v^2
         Vector3 forceDirection = this.velocity.multiply(-1f).normalize();
-        float crossArea = (float) (Math.PI * Math.pow(this.radius, 2));
+        float crossArea = 1f;
         float forceMagnitude = 0.5f * Constants.AIRDENSITY * Constants.DRAG_CONSTANT * crossArea * velocity.dotProduct(velocity);
         Vector3 dragForce = forceDirection.multiply(forceMagnitude);
         System.out.printf("Drag Force: (%.2f, %.2f, %.2f)\n", dragForce.x, dragForce.y, dragForce.z);
@@ -103,49 +121,6 @@ public class SoccerBall implements Animatable {
         }
     }
 
+
     
-    /*
-    public void applyWind(float wind) {
-    }
-    */
-
-    public void applyGravity(float gravity) {
-        applyForce(Constants.GRAVITY);
-    }
-
-    @Override
-    public float getX() {
-        return this.position.x;
-    }
-
-    @Override
-    public float getY() {
-        return this.position.y;
-    }
-
-    // Currently doing realtime scale, but we're going to want to speed it up many times over
-    // How do we avoid losing update information when doing so?
-    // Set a fixed timeStep, and then choose a timeScale of how many timesteps we iterate for each frame...
-    // At each frameUpdate, get the position, etc and show
-    @Override
-    public void update() {
-        applyDrag();
-        applyFriction();
-        updateVelocity();
-        updateAngularVelocity();
-        updatePosition();
-        System.out.printf("Position: (%.2f, %.2f, %.2f)\n", position.x, position.y, position.z);
-        System.out.printf("Velocity: (%.2f, %.2f, %.2f)\n", velocity.x, velocity.y, velocity.z);
-        System.out.printf("Acceleration: (%.2f, %.2f, %.2f)\n", acceleration.x, acceleration.y, acceleration.z);
-        zeroAcceleration(); // For new resolution of new forces in next frame
-    }
-
-    @Override
-    public void draw(Graphics g) {
-        int diameter = (int) (radius * 2 * 100); // Default scale, panel will handle actual scaling
-        g.setColor(Color.WHITE);
-        g.fillOval(-diameter/2, -diameter/2, diameter, diameter);
-        g.setColor(Color.BLACK);
-        g.drawOval(-diameter/2, -diameter/2, diameter, diameter);
-    }
 }
